@@ -67,70 +67,78 @@
     .dl { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); text-decoration: none; padding: 5px 11px; border-radius: 20px; border: 1px solid var(--border); transition: color .2s, border-color .2s; }
     .dl:hover { color: var(--accent); border-color: var(--accent); }
 
-    #no-src { display: none; padding: 10px 0 6px; font-size: 12px; color: var(--muted); line-height: 2; text-align: center; }
-    #no-src code { background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.15); color: var(--accent); padding: 4px 10px; border-radius: 6px; font-size: 10px; letter-spacing: .04em; word-break: break-all; }
-
     #error-msg { display: none; margin-top: 14px; padding: 10px 14px; background: rgba(255,60,60,.08); border: 1px solid rgba(255,60,60,.2); border-radius: 10px; font-size: 11px; color: #ff6b6b; line-height: 1.6; }
+
     audio { display: none; }
   </style>
 </head>
 <body>
 <div class="card">
   <div class="label"><span class="label-dot"></span><span class="label-text">Audio Grabación</span></div>
-  <div class="filename" id="fname">—</div>
+  <div class="filename">Diseño sin titulo (6).wav</div>
   <div class="filetype">WAV · Genesys Cloud</div>
 
-  <div id="player-body">
-    <div class="waveform-wrap" id="waveform-wrap">
-      <canvas id="waveform"></canvas>
-      <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
-    </div>
-    <div class="timebar"><span id="current-time">0:00</span><span id="total-time">0:00</span></div>
-    <div class="controls">
-      <div class="btn-group">
-        <button id="rw-btn" title="−10s">
-          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.45"/><text x="7.5" y="15.5" font-size="5.5" fill="currentColor" stroke="none" font-family="monospace" font-weight="bold">10</text></svg>
-        </button>
-        <button id="play-btn">
-          <svg id="icon-play" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-          <svg id="icon-pause" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-        </button>
-        <button id="ff-btn" title="+10s">
-          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3.45"/><text x="7.5" y="15.5" font-size="5.5" fill="currentColor" stroke="none" font-family="monospace" font-weight="bold">10</text></svg>
-        </button>
-        <button id="speed-btn">1x</button>
-      </div>
-      <div class="btn-group">
-        <div class="volume-wrap">
-          <button id="mute-btn">
-            <svg id="icon-vol" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-            <svg id="icon-mute" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-          </button>
-          <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
-        </div>
-        <a class="dl" id="dl-link" href="#" download>
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Descargar
-        </a>
-      </div>
-    </div>
-    <div id="error-msg"></div>
+  <div class="waveform-wrap" id="waveform-wrap">
+    <canvas id="waveform"></canvas>
+    <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
   </div>
 
-  <div id="no-src">
-    Sin fuente de audio.<br>
-    Configura la URL del Web Page así:<br>
-    <code>https://evarasv1.github.io/audio-inline/?src={{urlAudio}}</code>
+  <div class="timebar">
+    <span id="current-time">0:00</span>
+    <span id="total-time">0:00</span>
   </div>
+
+  <div class="controls">
+    <div class="btn-group">
+      <button id="rw-btn" title="−10s">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.45"/>
+          <text x="7.5" y="15.5" font-size="5.5" fill="currentColor" stroke="none" font-family="monospace" font-weight="bold">10</text>
+        </svg>
+      </button>
+      <button id="play-btn">
+        <svg id="icon-play" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        <svg id="icon-pause" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button id="ff-btn" title="+10s">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3.45"/>
+          <text x="7.5" y="15.5" font-size="5.5" fill="currentColor" stroke="none" font-family="monospace" font-weight="bold">10</text>
+        </svg>
+      </button>
+      <button id="speed-btn">1x</button>
+    </div>
+    <div class="btn-group">
+      <div class="volume-wrap">
+        <button id="mute-btn">
+          <svg id="icon-vol" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          <svg id="icon-mute" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+          </svg>
+        </button>
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
+      </div>
+      <a class="dl" href="./audio.wav" download="audio.wav">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Descargar
+      </a>
+    </div>
+  </div>
+
+  <div id="error-msg"></div>
 </div>
 
-<audio id="audio" preload="auto"></audio>
+<!-- Audio apunta al archivo en el mismo repo -->
+<audio id="audio" src="./audio.wav" preload="auto"></audio>
 
 <script>
-// ── 1. Leer ?src= de la URL ────────────────────────────────────────────────
-const params   = new URLSearchParams(window.location.search);
-const audioSrc = params.get('src') || params.get('audio') || params.get('url') || '';
-
 const audio      = document.getElementById('audio');
 const playBtn    = document.getElementById('play-btn');
 const iconPlay   = document.getElementById('icon-play');
@@ -145,30 +153,14 @@ const iconMute   = document.getElementById('icon-mute');
 const speedBtn   = document.getElementById('speed-btn');
 const rwBtn      = document.getElementById('rw-btn');
 const ffBtn      = document.getElementById('ff-btn');
-const dlLink     = document.getElementById('dl-link');
 const errorMsg   = document.getElementById('error-msg');
 const canvas     = document.getElementById('waveform');
 const ctx        = canvas.getContext('2d');
-const fnameEl    = document.getElementById('fname');
-const noSrc      = document.getElementById('no-src');
-const playerBody = document.getElementById('player-body');
 
-if (!audioSrc) {
-  playerBody.style.display = 'none';
-  noSrc.style.display = 'block';
-  fnameEl.textContent = 'Sin fuente';
-} else {
-  audio.src = audioSrc;
-  const name = decodeURIComponent(audioSrc.split('/').pop().split('?')[0]) || 'audio.wav';
-  fnameEl.textContent = name;
-  dlLink.href = audioSrc;
-  dlLink.download = name;
-}
-
-// ── 2. Canvas / Waveform ───────────────────────────────────────────────────
 const BARS = 80;
 let waveData = null, animFrame = null;
 
+// ── Canvas ────────────────────────────────────────────────────────────────
 function resizeCanvas() {
   const wrap = document.getElementById('waveform-wrap');
   canvas.width  = wrap.offsetWidth  * devicePixelRatio;
@@ -180,25 +172,25 @@ function resizeCanvas() {
 
 function drawFlatWave() {
   const W = canvas.width, H = canvas.height, gap = W / BARS, bw = gap * .5;
-  ctx.clearRect(0,0,W,H); ctx.fillStyle = '#1e2130';
+  ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#1e2130';
   for (let i = 0; i < BARS; i++) {
     const h = (.15 + Math.abs(Math.sin(i * .4)) * .35) * H;
-    ctx.beginPath(); ctx.roundRect(i*gap+gap*.25, (H-h)/2, bw, h, 2); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(i * gap + gap * .25, (H - h) / 2, bw, h, 2); ctx.fill();
   }
 }
 
 function drawWave(progress) {
-  const W = canvas.width, H = canvas.height, gap = W/BARS, bw = gap*.5, px = progress*W;
-  ctx.clearRect(0,0,W,H);
+  const W = canvas.width, H = canvas.height, gap = W / BARS, bw = gap * .5, px = progress * W;
+  ctx.clearRect(0, 0, W, H);
   for (let i = 0; i < BARS; i++) {
-    const x = i*gap+gap*.25;
-    const amp = Math.max(.08, waveData ? waveData[Math.floor(i*waveData.length/BARS)] : .2);
+    const x = i * gap + gap * .25;
+    const amp = Math.max(.08, waveData ? waveData[Math.floor(i * waveData.length / BARS)] : .2);
     const h = amp * H * .88;
-    const played = x+bw < px;
-    ctx.fillStyle  = played ? '#00e5ff' : '#1e2130';
+    const played = x + bw < px;
+    ctx.fillStyle   = played ? '#00e5ff' : '#1e2130';
     ctx.shadowColor = played ? 'rgba(0,229,255,.45)' : 'transparent';
     ctx.shadowBlur  = played ? 5 : 0;
-    ctx.beginPath(); ctx.roundRect(x,(H-h)/2,bw,h,2); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(x, (H - h) / 2, bw, h, 2); ctx.fill();
   }
   ctx.shadowBlur = 0;
 }
@@ -206,14 +198,14 @@ function drawWave(progress) {
 async function loadWaveform() {
   try {
     const ac  = new (window.AudioContext || window.webkitAudioContext)();
-    const res = await fetch(audioSrc, { credentials: 'include' });
+    const res = await fetch('./audio.wav');
     const buf = await res.arrayBuffer();
     const dec = await ac.decodeAudioData(buf);
     const data = dec.getChannelData(0);
     const block = Math.floor(data.length / BARS);
-    const peaks = Array.from({length: BARS}, (_,i) => {
+    const peaks = Array.from({ length: BARS }, (_, i) => {
       let m = 0;
-      for (let j = 0; j < block; j++) { const v = Math.abs(data[i*block+j]); if(v>m) m=v; }
+      for (let j = 0; j < block; j++) { const v = Math.abs(data[i * block + j]); if (v > m) m = v; }
       return m;
     });
     const maxP = Math.max(...peaks);
@@ -222,50 +214,78 @@ async function loadWaveform() {
   } catch { drawFlatWave(); }
 }
 
-// ── 3. Helpers ────────────────────────────────────────────────────────────
-const fmt = s => isNaN(s)||!isFinite(s) ? '0:00'
-  : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+// ── Helpers ───────────────────────────────────────────────────────────────
+const fmt = s => isNaN(s) || !isFinite(s) ? '0:00'
+  : `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
 function tick() {
   const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
-  seekSlider.value = pct; curTimeEl.textContent = fmt(audio.currentTime);
-  drawWave(pct / 100); animFrame = requestAnimationFrame(tick);
+  seekSlider.value = pct;
+  curTimeEl.textContent = fmt(audio.currentTime);
+  drawWave(pct / 100);
+  animFrame = requestAnimationFrame(tick);
 }
+
 function updateVol() {
   volSlider.style.setProperty('--vol', ((audio.muted ? 0 : audio.volume) * 100) + '%');
 }
 
-// ── 4. Event listeners ────────────────────────────────────────────────────
+// ── Events ────────────────────────────────────────────────────────────────
 const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2]; let si = 2;
 
 playBtn.addEventListener('click', () => {
-  if (!audioSrc) return;
   audio.paused ? audio.play().catch(showError) : audio.pause();
 });
-audio.addEventListener('play',  () => { iconPlay.style.display='none'; iconPause.style.display=''; animFrame = requestAnimationFrame(tick); });
-audio.addEventListener('pause', () => { iconPlay.style.display=''; iconPause.style.display='none'; cancelAnimationFrame(animFrame); });
+
+audio.addEventListener('play', () => {
+  iconPlay.style.display = 'none'; iconPause.style.display = '';
+  animFrame = requestAnimationFrame(tick);
+});
+audio.addEventListener('pause', () => {
+  iconPlay.style.display = ''; iconPause.style.display = 'none';
+  cancelAnimationFrame(animFrame);
+});
 audio.addEventListener('ended', () => {
-  iconPlay.style.display=''; iconPause.style.display='none';
-  cancelAnimationFrame(animFrame); seekSlider.value=0; curTimeEl.textContent='0:00';
+  iconPlay.style.display = ''; iconPause.style.display = 'none';
+  cancelAnimationFrame(animFrame);
+  seekSlider.value = 0; curTimeEl.textContent = '0:00';
   waveData ? drawWave(0) : drawFlatWave();
 });
-audio.addEventListener('loadedmetadata', () => { totTimeEl.textContent = fmt(audio.duration); loadWaveform(); });
+audio.addEventListener('loadedmetadata', () => {
+  totTimeEl.textContent = fmt(audio.duration);
+  loadWaveform();
+});
 audio.addEventListener('error', showError);
 
-seekSlider.addEventListener('input', () => { if(audio.duration) audio.currentTime = (seekSlider.value/100)*audio.duration; });
-volSlider.addEventListener('input',  () => { audio.volume=volSlider.value; audio.muted=false; iconVol.style.display=''; iconMute.style.display='none'; updateVol(); });
-muteBtn.addEventListener('click',    () => { audio.muted=!audio.muted; iconVol.style.display=audio.muted?'none':''; iconMute.style.display=audio.muted?'':'none'; updateVol(); });
-speedBtn.addEventListener('click', () => { si=(si+1)%speeds.length; audio.playbackRate=speeds[si]; speedBtn.textContent=speeds[si]+'x'; });
-rwBtn.addEventListener('click', () => { audio.currentTime=Math.max(0,audio.currentTime-10); });
-ffBtn.addEventListener('click', () => { audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10); });
+seekSlider.addEventListener('input', () => {
+  if (audio.duration) audio.currentTime = (seekSlider.value / 100) * audio.duration;
+});
+volSlider.addEventListener('input', () => {
+  audio.volume = volSlider.value; audio.muted = false;
+  iconVol.style.display = ''; iconMute.style.display = 'none'; updateVol();
+});
+muteBtn.addEventListener('click', () => {
+  audio.muted = !audio.muted;
+  iconVol.style.display  = audio.muted ? 'none' : '';
+  iconMute.style.display = audio.muted ? '' : 'none';
+  updateVol();
+});
+speedBtn.addEventListener('click', () => {
+  si = (si + 1) % speeds.length;
+  audio.playbackRate = speeds[si];
+  speedBtn.textContent = speeds[si] + 'x';
+});
+rwBtn.addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 10); });
+ffBtn.addEventListener('click', () => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10); });
 
 function showError() {
-  errorMsg.style.display='block';
-  errorMsg.innerHTML='No se pudo cargar el audio. Verifica que la URL sea accesible y que el servidor permita CORS.';
+  errorMsg.style.display = 'block';
+  errorMsg.textContent = 'No se pudo cargar el audio. Verifica que audio.wav está en el repositorio.';
 }
 
-// ── 5. Init ───────────────────────────────────────────────────────────────
-updateVol(); resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+// ── Init ──────────────────────────────────────────────────────────────────
+updateVol(); resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 </script>
 </body>
 </html>
