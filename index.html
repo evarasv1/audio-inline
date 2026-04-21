@@ -8,571 +8,264 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0b0c10;
-      --surface: #13151c;
-      --border: #1e2130;
-      --accent: #00e5ff;
-      --accent2: #7b5ea7;
-      --text: #e8eaf0;
-      --muted: #5a5f75;
-      --waveform: #1a1d2a;
+      --bg: #0b0c10; --surface: #13151c; --border: #1e2130;
+      --accent: #00e5ff; --text: #e8eaf0; --muted: #5a5f75;
     }
-
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: 'DM Mono', monospace;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      min-height: 100vh; display: flex;
+      align-items: center; justify-content: center; overflow: hidden;
     }
-
-    /* Ambient background */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
+      content: ''; position: fixed; inset: 0;
       background:
         radial-gradient(ellipse 60% 50% at 20% 60%, rgba(0,229,255,0.04) 0%, transparent 70%),
         radial-gradient(ellipse 50% 40% at 80% 30%, rgba(123,94,167,0.06) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
+      pointer-events: none; z-index: 0;
     }
-
     .card {
-      position: relative;
-      z-index: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 36px 40px 32px;
-      width: min(520px, 94vw);
-      box-shadow:
-        0 0 0 1px rgba(0,229,255,0.04),
-        0 24px 80px rgba(0,0,0,0.6),
+      position: relative; z-index: 1;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 32px 36px 28px; width: min(500px, 96vw);
+      box-shadow: 0 0 0 1px rgba(0,229,255,0.04), 0 24px 80px rgba(0,0,0,0.6),
         inset 0 1px 0 rgba(255,255,255,0.04);
     }
-
-    /* Top label */
-    .label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 28px;
-    }
+    .label { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
     .label-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent);
       animation: pulse 2s ease-in-out infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
-    }
-    .label-text {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+    .label-text { font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+    .filename { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .filetype { font-size: 11px; color: var(--muted); letter-spacing: .06em; margin-bottom: 26px; }
 
-    /* File name */
-    .filename {
-      font-family: 'Syne', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .filetype {
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-      margin-bottom: 32px;
-    }
+    .waveform-wrap { position: relative; width: 100%; height: 64px; margin-bottom: 12px; border-radius: 10px; overflow: hidden; cursor: pointer; }
+    canvas#waveform { display: block; width: 100%; height: 100%; }
+    input[type=range]#seek { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
 
-    /* Waveform canvas */
-    .waveform-wrap {
-      position: relative;
-      width: 100%;
-      height: 72px;
-      margin-bottom: 20px;
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    canvas#waveform {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-    .waveform-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg,
-        transparent var(--progress, 0%),
-        rgba(11,12,16,0.55) var(--progress, 0%)
-      );
-      pointer-events: none;
-      transition: --progress 0.05s linear;
-    }
-
-    /* Time bar */
-    .timebar {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 24px;
-      letter-spacing: 0.04em;
-    }
+    .timebar { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 20px; }
     #current-time { color: var(--accent); }
 
-    /* Seek slider (hidden, overlaps waveform) */
-    input[type=range]#seek {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 10;
-    }
+    .controls { display: flex; align-items: center; justify-content: space-between; }
+    .btn-group { display: flex; align-items: center; gap: 8px; }
+    button { background: none; border: none; cursor: pointer; color: var(--muted); padding: 7px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: color .2s, background .2s; }
+    button:hover { color: var(--text); background: rgba(255,255,255,.05); }
+    #play-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--accent); color: #000; box-shadow: 0 0 24px rgba(0,229,255,.3); transition: transform .15s, box-shadow .2s; }
+    #play-btn:hover { transform: scale(1.07); box-shadow: 0 0 36px rgba(0,229,255,.5); background: var(--accent); color: #000; }
 
-    /* Controls row */
-    .controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
+    .volume-wrap { display: flex; align-items: center; gap: 8px; }
+    input[type=range]#volume { -webkit-appearance: none; width: 68px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--accent) var(--vol,80%), var(--border) var(--vol,80%)); outline: none; cursor: pointer; }
+    input[type=range]#volume::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px rgba(0,229,255,.6); }
 
-    .btn-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--muted);
-      padding: 8px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s, background 0.2s;
-    }
-    button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-
-    /* Play/Pause main button */
-    #play-btn {
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #000;
-      box-shadow: 0 0 24px rgba(0,229,255,0.3);
-      transition: transform 0.15s, box-shadow 0.2s;
-    }
-    #play-btn:hover {
-      transform: scale(1.07);
-      box-shadow: 0 0 36px rgba(0,229,255,0.5);
-      background: var(--accent);
-      color: #000;
-    }
-    #play-btn svg { width: 22px; height: 22px; }
-
-    /* Volume */
-    .volume-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    input[type=range]#volume {
-      -webkit-appearance: none;
-      width: 72px;
-      height: 3px;
-      border-radius: 2px;
-      background: linear-gradient(90deg, var(--accent) var(--vol, 80%), var(--border) var(--vol, 80%));
-      outline: none;
-      cursor: pointer;
-    }
-    input[type=range]#volume::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 12px; height: 12px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 6px rgba(0,229,255,0.6);
-    }
-
-    /* Speed badge */
-    #speed-btn {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
+    #speed-btn { font-family: 'DM Mono', monospace; font-size: 11px; padding: 5px 11px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); }
     #speed-btn:hover { color: var(--accent); border-color: var(--accent); background: none; }
 
-    /* Download link */
-    .dl {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--muted);
-      text-decoration: none;
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      transition: color 0.2s, border-color 0.2s;
-      letter-spacing: 0.04em;
-    }
+    .dl { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); text-decoration: none; padding: 5px 11px; border-radius: 20px; border: 1px solid var(--border); transition: color .2s, border-color .2s; }
     .dl:hover { color: var(--accent); border-color: var(--accent); }
 
-    /* Error */
-    #error-msg {
-      display: none;
-      margin-top: 18px;
-      padding: 12px 16px;
-      background: rgba(255,60,60,0.08);
-      border: 1px solid rgba(255,60,60,0.2);
-      border-radius: 10px;
-      font-size: 12px;
-      color: #ff6b6b;
-      line-height: 1.6;
-    }
+    #no-src { display: none; padding: 10px 0 6px; font-size: 12px; color: var(--muted); line-height: 2; text-align: center; }
+    #no-src code { background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.15); color: var(--accent); padding: 4px 10px; border-radius: 6px; font-size: 10px; letter-spacing: .04em; word-break: break-all; }
 
-    /* Hidden native audio */
+    #error-msg { display: none; margin-top: 14px; padding: 10px 14px; background: rgba(255,60,60,.08); border: 1px solid rgba(255,60,60,.2); border-radius: 10px; font-size: 11px; color: #ff6b6b; line-height: 1.6; }
     audio { display: none; }
   </style>
 </head>
 <body>
-
 <div class="card">
-  <div class="label">
-    <span class="label-dot"></span>
-    <span class="label-text">Audio File</span>
-  </div>
+  <div class="label"><span class="label-dot"></span><span class="label-text">Audio Grabación</span></div>
+  <div class="filename" id="fname">—</div>
+  <div class="filetype">WAV · Genesys Cloud</div>
 
-  <div class="filename" id="fname">Diseño sin titulo (6).wav</div>
-  <div class="filetype">WAV · 16-bit · Stereo</div>
-
-  <div class="waveform-wrap" id="waveform-wrap">
-    <canvas id="waveform"></canvas>
-    <div class="waveform-overlay" id="waveform-overlay"></div>
-    <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
-  </div>
-
-  <div class="timebar">
-    <span id="current-time">0:00</span>
-    <span id="total-time">0:00</span>
-  </div>
-
-  <div class="controls">
-    <div class="btn-group">
-      <!-- Rewind 10s -->
-      <button id="rw-btn" title="Retroceder 10s">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="1 4 1 10 7 10"></polyline>
-          <path d="M3.51 15a9 9 0 1 0 .49-3.45"></path>
-          <text x="7" y="15" font-size="6" fill="currentColor" stroke="none" font-family="monospace" font-weight="bold">10</text>
-        </svg>
-      </button>
-
-      <!-- Play/Pause -->
-      <button id="play-btn" title="Reproducir / Pausar">
-        <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-        <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-      </button>
-
-      <!-- Forward 10s -->
-      <button id="ff-btn" title="Adelantar 10s">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="23 4 23 10 17 10"></polyline>
-          <path d="M20.49 15a9 9 0 1 1-.49-3.45"></path>
-          <text x="7" y="15" font-size="6" fill="currentColor" stroke="none" font-family="monospace" font-weight="bold">10</text>
-        </svg>
-      </button>
-
-      <!-- Speed -->
-      <button id="speed-btn" title="Velocidad de reproducción">1x</button>
+  <div id="player-body">
+    <div class="waveform-wrap" id="waveform-wrap">
+      <canvas id="waveform"></canvas>
+      <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
     </div>
-
-    <div class="btn-group">
-      <!-- Volume -->
-      <div class="volume-wrap">
-        <button id="mute-btn" title="Silenciar">
-          <svg id="icon-vol" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          </svg>
-          <svg id="icon-mute" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <line x1="23" y1="9" x2="17" y2="15"></line>
-            <line x1="17" y1="9" x2="23" y2="15"></line>
-          </svg>
+    <div class="timebar"><span id="current-time">0:00</span><span id="total-time">0:00</span></div>
+    <div class="controls">
+      <div class="btn-group">
+        <button id="rw-btn" title="−10s">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.45"/><text x="7.5" y="15.5" font-size="5.5" fill="currentColor" stroke="none" font-family="monospace" font-weight="bold">10</text></svg>
         </button>
-        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
+        <button id="play-btn">
+          <svg id="icon-play" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          <svg id="icon-pause" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <button id="ff-btn" title="+10s">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3.45"/><text x="7.5" y="15.5" font-size="5.5" fill="currentColor" stroke="none" font-family="monospace" font-weight="bold">10</text></svg>
+        </button>
+        <button id="speed-btn">1x</button>
       </div>
-
-      <!-- Download -->
-      <a class="dl" id="dl-link" href="#" download>
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Descargar
-      </a>
+      <div class="btn-group">
+        <div class="volume-wrap">
+          <button id="mute-btn">
+            <svg id="icon-vol" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <svg id="icon-mute" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          </button>
+          <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
+        </div>
+        <a class="dl" id="dl-link" href="#" download>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar
+        </a>
+      </div>
     </div>
+    <div id="error-msg"></div>
   </div>
 
-  <div id="error-msg"></div>
+  <div id="no-src">
+    Sin fuente de audio.<br>
+    Configura la URL del Web Page así:<br>
+    <code>https://evarasv1.github.io/audio-inline/?src={{urlAudio}}</code>
+  </div>
 </div>
 
-<!-- ⬇️  Reemplaza 'audio.wav' con el nombre real de tu archivo -->
-<audio id="audio" src="audio.wav" preload="auto"></audio>
+<audio id="audio" preload="auto"></audio>
 
 <script>
-  const audio = document.getElementById('audio');
-  const playBtn = document.getElementById('play-btn');
-  const iconPlay = document.getElementById('icon-play');
-  const iconPause = document.getElementById('icon-pause');
-  const seekSlider = document.getElementById('seek');
-  const currentTimeEl = document.getElementById('current-time');
-  const totalTimeEl = document.getElementById('total-time');
-  const volumeSlider = document.getElementById('volume');
-  const muteBtn = document.getElementById('mute-btn');
-  const iconVol = document.getElementById('icon-vol');
-  const iconMute = document.getElementById('icon-mute');
-  const speedBtn = document.getElementById('speed-btn');
-  const rwBtn = document.getElementById('rw-btn');
-  const ffBtn = document.getElementById('ff-btn');
-  const dlLink = document.getElementById('dl-link');
-  const waveformOverlay = document.getElementById('waveform-overlay');
-  const errorMsg = document.getElementById('error-msg');
-  const canvas = document.getElementById('waveform');
-  const ctx = canvas.getContext('2d');
-  const fname = document.getElementById('fname');
+// ── 1. Leer ?src= de la URL ────────────────────────────────────────────────
+const params   = new URLSearchParams(window.location.search);
+const audioSrc = params.get('src') || params.get('audio') || params.get('url') || '';
 
-  const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
-  let speedIdx = 2;
-  let isMuted = false;
-  let prevVol = 0.8;
-  let waveData = null;
-  let animFrame = null;
+const audio      = document.getElementById('audio');
+const playBtn    = document.getElementById('play-btn');
+const iconPlay   = document.getElementById('icon-play');
+const iconPause  = document.getElementById('icon-pause');
+const seekSlider = document.getElementById('seek');
+const curTimeEl  = document.getElementById('current-time');
+const totTimeEl  = document.getElementById('total-time');
+const volSlider  = document.getElementById('volume');
+const muteBtn    = document.getElementById('mute-btn');
+const iconVol    = document.getElementById('icon-vol');
+const iconMute   = document.getElementById('icon-mute');
+const speedBtn   = document.getElementById('speed-btn');
+const rwBtn      = document.getElementById('rw-btn');
+const ffBtn      = document.getElementById('ff-btn');
+const dlLink     = document.getElementById('dl-link');
+const errorMsg   = document.getElementById('error-msg');
+const canvas     = document.getElementById('waveform');
+const ctx        = canvas.getContext('2d');
+const fnameEl    = document.getElementById('fname');
+const noSrc      = document.getElementById('no-src');
+const playerBody = document.getElementById('player-body');
 
-  // --- Filename from src ---
-  const src = audio.src || audio.getAttribute('src') || '';
-  if (src) {
-    const name = decodeURIComponent(src.split('/').pop());
-    if (name) fname.textContent = name;
-    dlLink.href = src;
-    dlLink.download = name;
+if (!audioSrc) {
+  playerBody.style.display = 'none';
+  noSrc.style.display = 'block';
+  fnameEl.textContent = 'Sin fuente';
+} else {
+  audio.src = audioSrc;
+  const name = decodeURIComponent(audioSrc.split('/').pop().split('?')[0]) || 'audio.wav';
+  fnameEl.textContent = name;
+  dlLink.href = audioSrc;
+  dlLink.download = name;
+}
+
+// ── 2. Canvas / Waveform ───────────────────────────────────────────────────
+const BARS = 80;
+let waveData = null, animFrame = null;
+
+function resizeCanvas() {
+  const wrap = document.getElementById('waveform-wrap');
+  canvas.width  = wrap.offsetWidth  * devicePixelRatio;
+  canvas.height = wrap.offsetHeight * devicePixelRatio;
+  canvas.style.width  = wrap.offsetWidth  + 'px';
+  canvas.style.height = wrap.offsetHeight + 'px';
+  waveData ? drawWave(audio.currentTime / (audio.duration || 1)) : drawFlatWave();
+}
+
+function drawFlatWave() {
+  const W = canvas.width, H = canvas.height, gap = W / BARS, bw = gap * .5;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle = '#1e2130';
+  for (let i = 0; i < BARS; i++) {
+    const h = (.15 + Math.abs(Math.sin(i * .4)) * .35) * H;
+    ctx.beginPath(); ctx.roundRect(i*gap+gap*.25, (H-h)/2, bw, h, 2); ctx.fill();
   }
+}
 
-  // --- Waveform drawing ---
-  function resizeCanvas() {
-    const wrap = document.getElementById('waveform-wrap');
-    canvas.width = wrap.offsetWidth * window.devicePixelRatio;
-    canvas.height = wrap.offsetHeight * window.devicePixelRatio;
-    canvas.style.width = wrap.offsetWidth + 'px';
-    canvas.style.height = wrap.offsetHeight + 'px';
-    if (waveData) drawWave(audio.currentTime / (audio.duration || 1));
-    else drawFlatWave();
+function drawWave(progress) {
+  const W = canvas.width, H = canvas.height, gap = W/BARS, bw = gap*.5, px = progress*W;
+  ctx.clearRect(0,0,W,H);
+  for (let i = 0; i < BARS; i++) {
+    const x = i*gap+gap*.25;
+    const amp = Math.max(.08, waveData ? waveData[Math.floor(i*waveData.length/BARS)] : .2);
+    const h = amp * H * .88;
+    const played = x+bw < px;
+    ctx.fillStyle  = played ? '#00e5ff' : '#1e2130';
+    ctx.shadowColor = played ? 'rgba(0,229,255,.45)' : 'transparent';
+    ctx.shadowBlur  = played ? 5 : 0;
+    ctx.beginPath(); ctx.roundRect(x,(H-h)/2,bw,h,2); ctx.fill();
   }
+  ctx.shadowBlur = 0;
+}
 
-  function drawFlatWave() {
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-    const bars = 80;
-    const barW = (W / bars) * 0.5;
-    const gap = W / bars;
-    ctx.fillStyle = '#1e2130';
-    for (let i = 0; i < bars; i++) {
-      const h = (0.15 + Math.abs(Math.sin(i * 0.4)) * 0.35) * H;
-      ctx.beginPath();
-      ctx.roundRect(i * gap + gap * 0.25, (H - h) / 2, barW, h, 3);
-      ctx.fill();
-    }
-  }
+async function loadWaveform() {
+  try {
+    const ac  = new (window.AudioContext || window.webkitAudioContext)();
+    const res = await fetch(audioSrc, { credentials: 'include' });
+    const buf = await res.arrayBuffer();
+    const dec = await ac.decodeAudioData(buf);
+    const data = dec.getChannelData(0);
+    const block = Math.floor(data.length / BARS);
+    const peaks = Array.from({length: BARS}, (_,i) => {
+      let m = 0;
+      for (let j = 0; j < block; j++) { const v = Math.abs(data[i*block+j]); if(v>m) m=v; }
+      return m;
+    });
+    const maxP = Math.max(...peaks);
+    waveData = peaks.map(p => p / maxP);
+    drawWave(0);
+  } catch { drawFlatWave(); }
+}
 
-  function drawWave(progress) {
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-    const bars = 80;
-    const barW = (W / bars) * 0.5;
-    const gap = W / bars;
-    const progressX = progress * W;
+// ── 3. Helpers ────────────────────────────────────────────────────────────
+const fmt = s => isNaN(s)||!isFinite(s) ? '0:00'
+  : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 
-    for (let i = 0; i < bars; i++) {
-      const x = i * gap + gap * 0.25;
-      let amplitude = waveData ? waveData[Math.floor(i * waveData.length / bars)] : 0;
-      amplitude = Math.max(0.08, amplitude);
-      const h = amplitude * H * 0.9;
+function tick() {
+  const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+  seekSlider.value = pct; curTimeEl.textContent = fmt(audio.currentTime);
+  drawWave(pct / 100); animFrame = requestAnimationFrame(tick);
+}
+function updateVol() {
+  volSlider.style.setProperty('--vol', ((audio.muted ? 0 : audio.volume) * 100) + '%');
+}
 
-      if (x + barW < progressX) {
-        ctx.fillStyle = '#00e5ff';
-        // glow
-        ctx.shadowColor = 'rgba(0,229,255,0.5)';
-        ctx.shadowBlur = 6;
-      } else {
-        ctx.fillStyle = '#1e2130';
-        ctx.shadowBlur = 0;
-      }
-      ctx.beginPath();
-      ctx.roundRect(x, (H - h) / 2, barW, h, 3);
-      ctx.fill();
-    }
-    ctx.shadowBlur = 0;
-  }
+// ── 4. Event listeners ────────────────────────────────────────────────────
+const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2]; let si = 2;
 
-  async function loadWaveform() {
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const res = await fetch(audio.src);
-      const buf = await res.arrayBuffer();
-      const decoded = await audioCtx.decodeAudioData(buf);
-      const data = decoded.getChannelData(0);
-      const samples = 80;
-      const blockSize = Math.floor(data.length / samples);
-      const peaks = [];
-      for (let i = 0; i < samples; i++) {
-        let max = 0;
-        for (let j = 0; j < blockSize; j++) {
-          const v = Math.abs(data[i * blockSize + j]);
-          if (v > max) max = v;
-        }
-        peaks.push(max);
-      }
-      // Normalize
-      const maxPeak = Math.max(...peaks);
-      waveData = peaks.map(p => p / maxPeak);
-      drawWave(0);
-    } catch (e) {
-      drawFlatWave();
-    }
-  }
+playBtn.addEventListener('click', () => {
+  if (!audioSrc) return;
+  audio.paused ? audio.play().catch(showError) : audio.pause();
+});
+audio.addEventListener('play',  () => { iconPlay.style.display='none'; iconPause.style.display=''; animFrame = requestAnimationFrame(tick); });
+audio.addEventListener('pause', () => { iconPlay.style.display=''; iconPause.style.display='none'; cancelAnimationFrame(animFrame); });
+audio.addEventListener('ended', () => {
+  iconPlay.style.display=''; iconPause.style.display='none';
+  cancelAnimationFrame(animFrame); seekSlider.value=0; curTimeEl.textContent='0:00';
+  waveData ? drawWave(0) : drawFlatWave();
+});
+audio.addEventListener('loadedmetadata', () => { totTimeEl.textContent = fmt(audio.duration); loadWaveform(); });
+audio.addEventListener('error', showError);
 
-  // --- Helpers ---
-  function fmt(s) {
-    if (isNaN(s) || !isFinite(s)) return '0:00';
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return `${m}:${sec.toString().padStart(2, '0')}`;
-  }
+seekSlider.addEventListener('input', () => { if(audio.duration) audio.currentTime = (seekSlider.value/100)*audio.duration; });
+volSlider.addEventListener('input',  () => { audio.volume=volSlider.value; audio.muted=false; iconVol.style.display=''; iconMute.style.display='none'; updateVol(); });
+muteBtn.addEventListener('click',    () => { audio.muted=!audio.muted; iconVol.style.display=audio.muted?'none':''; iconMute.style.display=audio.muted?'':'none'; updateVol(); });
+speedBtn.addEventListener('click', () => { si=(si+1)%speeds.length; audio.playbackRate=speeds[si]; speedBtn.textContent=speeds[si]+'x'; });
+rwBtn.addEventListener('click', () => { audio.currentTime=Math.max(0,audio.currentTime-10); });
+ffBtn.addEventListener('click', () => { audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10); });
 
-  function updateProgress() {
-    const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
-    seekSlider.value = pct;
-    currentTimeEl.textContent = fmt(audio.currentTime);
-    waveformOverlay.style.setProperty('--progress', pct + '%');
-    if (waveData) drawWave(pct / 100);
-    animFrame = requestAnimationFrame(updateProgress);
-  }
+function showError() {
+  errorMsg.style.display='block';
+  errorMsg.innerHTML='No se pudo cargar el audio. Verifica que la URL sea accesible y que el servidor permita CORS.';
+}
 
-  function updateVolumeSlider() {
-    const vol = isMuted ? 0 : audio.volume;
-    volumeSlider.style.setProperty('--vol', (vol * 100) + '%');
-  }
-
-  // --- Events ---
-  playBtn.addEventListener('click', () => {
-    if (audio.paused) {
-      audio.play().catch(err => {
-        errorMsg.style.display = 'block';
-        errorMsg.innerHTML = `<strong>No se pudo cargar el audio.</strong><br>
-          Asegúrate de que el archivo <code>audio.wav</code> está en la misma carpeta que este <code>index.html</code> en tu repositorio de GitHub.`;
-      });
-    } else {
-      audio.pause();
-    }
-  });
-
-  audio.addEventListener('play', () => {
-    iconPlay.style.display = 'none';
-    iconPause.style.display = '';
-    animFrame = requestAnimationFrame(updateProgress);
-  });
-
-  audio.addEventListener('pause', () => {
-    iconPlay.style.display = '';
-    iconPause.style.display = 'none';
-    cancelAnimationFrame(animFrame);
-  });
-
-  audio.addEventListener('ended', () => {
-    iconPlay.style.display = '';
-    iconPause.style.display = 'none';
-    cancelAnimationFrame(animFrame);
-    seekSlider.value = 0;
-    currentTimeEl.textContent = '0:00';
-    waveformOverlay.style.setProperty('--progress', '0%');
-    if (waveData) drawWave(0);
-  });
-
-  audio.addEventListener('loadedmetadata', () => {
-    totalTimeEl.textContent = fmt(audio.duration);
-    loadWaveform();
-  });
-
-  audio.addEventListener('error', () => {
-    errorMsg.style.display = 'block';
-    errorMsg.innerHTML = `<strong>No se pudo cargar el audio.</strong><br>
-      Asegúrate de subir tu archivo <code>.wav</code> al repositorio y que el nombre coincida con el atributo <code>src</code> en el HTML.`;
-  });
-
-  seekSlider.addEventListener('input', () => {
-    if (audio.duration) {
-      audio.currentTime = (seekSlider.value / 100) * audio.duration;
-    }
-  });
-
-  volumeSlider.addEventListener('input', () => {
-    audio.volume = volumeSlider.value;
-    prevVol = audio.volume;
-    isMuted = audio.volume === 0;
-    iconVol.style.display = isMuted ? 'none' : '';
-    iconMute.style.display = isMuted ? '' : 'none';
-    updateVolumeSlider();
-  });
-
-  muteBtn.addEventListener('click', () => {
-    isMuted = !isMuted;
-    audio.volume = isMuted ? 0 : (prevVol || 0.8);
-    iconVol.style.display = isMuted ? 'none' : '';
-    iconMute.style.display = isMuted ? '' : 'none';
-    updateVolumeSlider();
-  });
-
-  speedBtn.addEventListener('click', () => {
-    speedIdx = (speedIdx + 1) % speeds.length;
-    audio.playbackRate = speeds[speedIdx];
-    speedBtn.textContent = speeds[speedIdx] + 'x';
-  });
-
-  rwBtn.addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 10); });
-  ffBtn.addEventListener('click', () => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10); });
-
-  // Init
-  updateVolumeSlider();
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+// ── 5. Init ───────────────────────────────────────────────────────────────
+updateVol(); resizeCanvas(); window.addEventListener('resize', resizeCanvas);
 </script>
 </body>
 </html>
